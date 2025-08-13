@@ -1,83 +1,91 @@
-import { useState, useEffect } from 'react';
+import * as React from "react"
 
-export type DeviceType = 'mobile' | 'tablet' | 'desktop';
-export type Breakpoint = 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl';
-
-const breakpoints = {
-  xs: 475,
+// Enhanced breakpoint system for comprehensive responsive design
+export const BREAKPOINTS = {
+  xs: 0,
   sm: 640,
   md: 768,
   lg: 1024,
   xl: 1280,
   '2xl': 1536,
-};
+} as const
 
-export function useDeviceType(): DeviceType {
-  const [deviceType, setDeviceType] = useState<DeviceType>('desktop');
+export type Breakpoint = keyof typeof BREAKPOINTS
+export type DeviceType = 'mobile' | 'tablet' | 'desktop'
 
-  useEffect(() => {
-    const checkDeviceType = () => {
-      const width = window.innerWidth;
-      if (width < breakpoints.md) {
-        setDeviceType('mobile');
-      } else if (width < breakpoints.lg) {
-        setDeviceType('tablet');
-      } else {
-        setDeviceType('desktop');
-      }
-    };
+export function useIsMobile() {
+  const [isMobile, setIsMobile] = React.useState<boolean | undefined>(undefined)
 
-    checkDeviceType();
+  React.useEffect(() => {
+    const mql = window.matchMedia(`(max-width: ${BREAKPOINTS.md - 1}px)`)
+    const onChange = () => {
+      setIsMobile(window.innerWidth < BREAKPOINTS.md)
+    }
+    mql.addEventListener("change", onChange)
+    setIsMobile(window.innerWidth < BREAKPOINTS.md)
+    return () => mql.removeEventListener("change", onChange)
+  }, [])
 
-    const handleResize = () => checkDeviceType();
-    window.addEventListener('resize', handleResize);
-    
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
-
-  return deviceType;
+  return !!isMobile
 }
 
-export function useIsMobile(): boolean {
-  const deviceType = useDeviceType();
-  return deviceType === 'mobile';
+export function useDeviceType(): DeviceType {
+  const [deviceType, setDeviceType] = React.useState<DeviceType>('desktop')
+
+  React.useEffect(() => {
+    const updateDeviceType = () => {
+      const width = window.innerWidth
+      if (width < BREAKPOINTS.md) {
+        setDeviceType('mobile')
+      } else if (width < BREAKPOINTS.lg) {
+        setDeviceType('tablet')
+      } else {
+        setDeviceType('desktop')
+      }
+    }
+
+    const mql = window.matchMedia('(max-width: 1023px)')
+    mql.addEventListener('change', updateDeviceType)
+    updateDeviceType()
+    
+    return () => mql.removeEventListener('change', updateDeviceType)
+  }, [])
+
+  return deviceType
 }
 
 export function useBreakpoint(breakpoint: Breakpoint): boolean {
-  const [matches, setMatches] = useState(false);
+  const [matches, setMatches] = React.useState<boolean>(false)
 
-  useEffect(() => {
-    const checkBreakpoint = () => {
-      const width = window.innerWidth;
-      setMatches(width >= breakpoints[breakpoint]);
-    };
+  React.useEffect(() => {
+    const mql = window.matchMedia(`(min-width: ${BREAKPOINTS[breakpoint]}px)`)
+    const onChange = () => setMatches(mql.matches)
+    mql.addEventListener('change', onChange)
+    setMatches(mql.matches)
+    return () => mql.removeEventListener('change', onChange)
+  }, [breakpoint])
 
-    checkBreakpoint();
-
-    const handleResize = () => checkBreakpoint();
-    window.addEventListener('resize', handleResize);
-    
-    return () => window.removeEventListener('resize', handleResize);
-  }, [breakpoint]);
-
-  return matches;
+  return matches
 }
 
 export function useViewportSize() {
-  const [size, setSize] = useState({ width: 0, height: 0 });
+  const [size, setSize] = React.useState<{ width: number; height: number }>(
+    () => ({
+      width: typeof window !== 'undefined' ? window.innerWidth : 0,
+      height: typeof window !== 'undefined' ? window.innerHeight : 0,
+    })
+  )
 
-  useEffect(() => {
+  React.useEffect(() => {
     const updateSize = () => {
-      setSize({ width: window.innerWidth, height: window.innerHeight });
-    };
+      setSize({ width: window.innerWidth, height: window.innerHeight })
+    }
 
-    updateSize();
-
-    const handleResize = () => updateSize();
-    window.addEventListener('resize', handleResize);
+    window.addEventListener('resize', updateSize)
+    updateSize()
     
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
+    return () => window.removeEventListener('resize', updateSize)
+  }, [])
 
-  return size;
+  return size
 }
