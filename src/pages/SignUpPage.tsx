@@ -1,11 +1,12 @@
 import { useState } from 'react';
-import { useAuth } from '../contexts/AuthContext';
 import { Link, useNavigate } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Alert } from '@/components/ui/alert';
-import { Mail, Lock, ArrowRight, Loader2, User } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
+import { Button } from '../components/ui/button';
+import { Input } from '../components/ui/input';
+import { Label } from '../components/ui/label';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
+import { Alert, AlertDescription } from '../components/ui/alert';
+import { Mail, Lock, User, ArrowRight, Sparkles, CheckCircle } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function SignUpPage() {
@@ -14,7 +15,7 @@ export default function SignUpPage() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
-  
+  const [success, setSuccess] = useState(false);
   const { signUp } = useAuth();
   const navigate = useNavigate();
 
@@ -22,14 +23,16 @@ export default function SignUpPage() {
     e.preventDefault();
     setIsLoading(true);
     setError('');
+    setSuccess(false);
 
-    // Validation
+    // Validate passwords match
     if (password !== confirmPassword) {
       setError('Passwords do not match');
       setIsLoading(false);
       return;
     }
 
+    // Validate password strength
     if (password.length < 6) {
       setError('Password must be at least 6 characters long');
       setIsLoading(false);
@@ -37,150 +40,179 @@ export default function SignUpPage() {
     }
 
     try {
-      const { error } = await signUp(email, password);
+      const { data, error } = await signUp(email, password);
       
       if (error) {
         setError(error.message);
-        toast.error('Sign up failed', {
-          description: error.message
-        });
+        toast.error('Sign up failed: ' + error.message);
       } else {
-        toast.success('Account created!', {
-          description: 'Please check your email to verify your account.'
-        });
-        navigate('/login', { replace: true });
+        setSuccess(true);
+        toast.success('Account created successfully! Please check your email to verify your account.');
+        // Don't navigate immediately - let user know to check email
       }
     } catch (err) {
-      const message = 'An unexpected error occurred';
-      setError(message);
-      toast.error(message);
+      console.error('Sign up error:', err);
+      setError('An unexpected error occurred');
     } finally {
       setIsLoading(false);
     }
   };
 
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
-        <div className="text-center">
-          <div className="mx-auto h-16 w-16 bg-primary rounded-2xl flex items-center justify-center mb-6">
-            <User className="h-8 w-8 text-white" />
-          </div>
-          <h2 className="text-3xl font-bold text-gray-900 dark:text-white">
-            Create your account
-          </h2>
-          <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-            Start creating beautiful email templates with AI
-          </p>
+  if (success) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900 flex items-center justify-center p-4">
+        <div className="w-full max-w-md">
+          <Card className="shadow-lg border-0 bg-white/80 backdrop-blur-sm dark:bg-slate-800/80">
+            <CardHeader className="space-y-1 text-center">
+              <div className="flex justify-center mb-4">
+                <div className="flex items-center justify-center w-16 h-16 bg-green-100 rounded-full">
+                  <CheckCircle className="h-8 w-8 text-green-600" />
+                </div>
+              </div>
+              <CardTitle className="text-2xl font-bold">Check Your Email</CardTitle>
+              <CardDescription>
+                We've sent you a verification link at <strong>{email}</strong>
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="text-center">
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">
+                Click the link in your email to verify your account and complete the signup process.
+              </p>
+              <Button 
+                onClick={() => navigate('/login')}
+                className="w-full bg-gradient-to-r from-blue-600 to-teal-600 hover:from-blue-700 hover:to-teal-700"
+              >
+                Return to Login
+              </Button>
+            </CardContent>
+          </Card>
         </div>
-        
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          {error && (
-            <Alert variant="destructive">
-              {error}
-            </Alert>
-          )}
-          
-          <div className="space-y-4">
-            <div>
-              <Label htmlFor="email" className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                Email address
-              </Label>
-              <div className="mt-1 relative">
-                <Input
-                  id="email"
-                  name="email"
-                  type="email"
-                  autoComplete="email"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="pl-10"
-                  placeholder="Enter your email"
-                  disabled={isLoading}
-                />
-                <Mail className="h-5 w-5 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900 flex items-center justify-center p-4">
+      <div className="w-full max-w-md">
+        {/* Logo */}
+        <div className="flex justify-center mb-8">
+          <div className="flex items-center space-x-2">
+            <div className="flex items-center justify-center w-10 h-10 bg-gradient-to-r from-blue-600 to-teal-600 rounded-lg">
+              <Mail className="h-6 w-6 text-white" />
+            </div>
+            <div className="flex items-center space-x-2">
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+                MailSmithery
+              </h1>
+              <div className="flex items-center space-x-1 px-2 py-1 bg-blue-100 dark:bg-blue-900 rounded-md">
+                <Sparkles className="h-3 w-3 text-blue-600 dark:text-blue-400" />
+                <span className="text-xs font-medium text-blue-600 dark:text-blue-400">AI</span>
               </div>
             </div>
-            
-            <div>
-              <Label htmlFor="password" className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                Password
-              </Label>
-              <div className="mt-1 relative">
-                <Input
-                  id="password"
-                  name="password"
-                  type="password"
-                  autoComplete="new-password"
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="pl-10"
-                  placeholder="Create a password"
-                  disabled={isLoading}
-                />
-                <Lock className="h-5 w-5 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" />
+          </div>
+        </div>
+
+        {/* Sign Up Form */}
+        <Card className="shadow-lg border-0 bg-white/80 backdrop-blur-sm dark:bg-slate-800/80">
+          <CardHeader className="space-y-1 text-center">
+            <CardTitle className="text-2xl font-bold">Create Account</CardTitle>
+            <CardDescription>
+              Start creating beautiful email templates with AI assistance
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              {error && (
+                <Alert variant="destructive">
+                  <AlertDescription>{error}</AlertDescription>
+                </Alert>
+              )}
+              
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="Enter your email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="pl-10"
+                    required
+                    disabled={isLoading}
+                  />
+                </div>
               </div>
-              <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                Must be at least 6 characters long
+              
+              <div className="space-y-2">
+                <Label htmlFor="password">Password</Label>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                  <Input
+                    id="password"
+                    type="password"
+                    placeholder="Create a password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="pl-10"
+                    required
+                    disabled={isLoading}
+                  />
+                </div>
+                <p className="text-xs text-gray-500">Must be at least 6 characters long</p>
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="confirmPassword">Confirm Password</Label>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                  <Input
+                    id="confirmPassword"
+                    type="password"
+                    placeholder="Confirm your password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    className="pl-10"
+                    required
+                    disabled={isLoading}
+                  />
+                </div>
+              </div>
+              
+              <Button 
+                type="submit" 
+                className="w-full bg-gradient-to-r from-blue-600 to-teal-600 hover:from-blue-700 hover:to-teal-700"
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  'Creating Account...'
+                ) : (
+                  <>
+                    Create Account
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </>
+                )}
+              </Button>
+            </form>
+            
+            <div className="mt-6 text-center text-sm">
+              <p className="text-gray-600 dark:text-gray-400">
+                Already have an account?{' '}
+                <Link 
+                  to="/login" 
+                  className="font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300"
+                >
+                  Sign in
+                </Link>
               </p>
             </div>
-            
-            <div>
-              <Label htmlFor="confirmPassword" className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                Confirm Password
-              </Label>
-              <div className="mt-1 relative">
-                <Input
-                  id="confirmPassword"
-                  name="confirmPassword"
-                  type="password"
-                  autoComplete="new-password"
-                  required
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="pl-10"
-                  placeholder="Confirm your password"
-                  disabled={isLoading}
-                />
-                <Lock className="h-5 w-5 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" />
-              </div>
-            </div>
-          </div>
-
-          <div>
-            <Button
-              type="submit"
-              className="w-full"
-              disabled={isLoading}
-            >
-              {isLoading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Creating account...
-                </>
-              ) : (
-                <>
-                  Create account
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </>
-              )}
-            </Button>
-          </div>
-          
-          <div className="text-center space-y-2">
-            <p className="text-sm text-gray-600 dark:text-gray-400">
-              Already have an account?{' '}
-              <Link
-                to="/login"
-                className="font-medium text-primary hover:text-primary/80 transition-colors"
-              >
-                Sign in
-              </Link>
-            </p>
-          </div>
-        </form>
+          </CardContent>
+        </Card>
+        
+        <div className="mt-8 text-center text-xs text-gray-500 dark:text-gray-400">
+          By creating an account, you agree to our Terms of Service and Privacy Policy
+        </div>
       </div>
     </div>
   );
