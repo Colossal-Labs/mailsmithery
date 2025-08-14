@@ -140,7 +140,7 @@ export function EditorRightPanel({ project, template, templatePlan, lintResults,
                             </div>
                           </div>
                           <div className="text-xs text-slate-600 dark:text-slate-400">
-                            {section.props.headline || section.props.title || section.props.content || 'Section content'}
+                            {section.props?.headline || section.props?.title || section.props?.content || 'Section content'}
                           </div>
                         </Card>
                       ))}
