@@ -9,6 +9,7 @@ import AuthCallbackPage from './pages/AuthCallbackPage';
 import ProjectsNew from './pages/ProjectsNew';
 import GenerateEditor from './pages/GenerateEditor';
 import ProjectsList from './pages/ProjectsList';
+import ProjectTemplates from './pages/ProjectTemplates';
 import './App.css';
 
 function App() {
@@ -33,6 +34,11 @@ function App() {
               <Route path="/projects/new" element={
                 <ProtectedRoute>
                   <ProjectsNew />
+                </ProtectedRoute>
+              } />
+              <Route path="/projects/:projectId/templates" element={
+                <ProtectedRoute>
+                  <ProjectTemplates />
                 </ProtectedRoute>
               } />
               <Route path="/generate" element={
