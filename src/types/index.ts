@@ -36,6 +36,122 @@ export interface BrandTokens {
   radius: number;
   logoLight?: string;
   logoDark?: string;
+  // Enhanced brand extraction data
+  extraction?: {
+    url: string;
+    extractedAt: string;
+    status: 'completed' | 'pending' | 'failed';
+    metadata: {
+      title: string;
+      description: string;
+      keywords: string;
+      domain: string;
+      ogTitle?: string;
+      ogDescription?: string;
+      ogImage?: string;
+    };
+  };
+  visual?: {
+    logo?: {
+      url: string;
+      position?: { x: number; y: number; width: number; height: number };
+      confidence?: number;
+    };
+    colors?: {
+      primary: string;
+      secondary: string;
+      accent: string;
+      palette: string[];
+    };
+    typography?: {
+      primaryFont: string;
+      secondaryFont: string;
+      headingFont: string;
+    };
+    screenshots?: {
+      desktop: string;
+      mobile: string;
+      actions?: string[];
+    };
+  };
+  content?: {
+    brand?: {
+      name: string;
+      tagline?: string;
+      description: string;
+      values?: string[];
+    };
+    messaging?: {
+      tone: string;
+      style: string;
+      keywords: string[];
+    };
+  };
+  manual_overrides?: {
+    colors?: { primary?: string; secondary?: string; accent?: string };
+    logo?: string;
+    fonts?: { primary?: string; secondary?: string };
+  };
+}
+
+// Brand extraction types
+export interface BrandExtraction {
+  id: string;
+  project_id: string;
+  url: string;
+  status: 'pending' | 'processing' | 'completed' | 'failed';
+  extraction_started_at: string;
+  extraction_completed_at?: string;
+  extraction_duration_ms?: number;
+  firecrawl_response?: any;
+  screenshots?: {
+    desktop?: string;
+    mobile?: string;
+    actions?: string[];
+  };
+  page_content?: string;
+  page_metadata?: {
+    title: string;
+    description: string;
+    keywords: string;
+    domain: string;
+    ogTitle?: string;
+    ogDescription?: string;
+    ogImage?: string;
+  };
+  extracted_colors?: {
+    primary: string;
+    secondary: string;
+    accent: string;
+    palette: string[];
+  };
+  extracted_logo?: {
+    url: string;
+    position?: { x: number; y: number; width: number; height: number };
+    confidence?: number;
+  };
+  extracted_content?: {
+    brand?: {
+      name: string;
+      tagline?: string;
+      description: string;
+      values?: string[];
+    };
+    messaging?: {
+      tone: string;
+      style: string;
+      keywords: string[];
+    };
+  };
+  ai_analysis_metadata?: {
+    version: string;
+    analyzed_at: string;
+    features: string[];
+  };
+  error_message?: string;
+  retry_count?: number;
+  created_at: string;
+  updated_at: string;
 }
 
 // LLM Response Schemas

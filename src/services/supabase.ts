@@ -238,6 +238,83 @@ class SupabaseService {
     if (error) throw error;
     return result.data;
   }
+
+  // Brand extraction operations
+  async extractBrand(projectId: string, url: string): Promise<{ extractionId: string; status: string; duration: number; brandTokens: any }> {
+    const user = await this.getCurrentUser();
+    
+    // Verify user owns the project
+    const project = await this.getProject(projectId);
+    if (!project) {
+      throw new Error('Project not found or access denied');
+    }
+    
+    const { data: result, error } = await supabase.functions.invoke('extract-brand', {
+      body: { projectId, url }
+    });
+
+    if (error) throw error;
+    return result.data;
+  }
+
+  async getBrandExtractions(projectId: string): Promise<any[]> {
+    const user = await this.getCurrentUser();
+    
+    // Verify user owns the project
+    const project = await this.getProject(projectId);
+    if (!project) {
+      throw new Error('Project not found or access denied');
+    }
+    
+    const { data, error } = await supabase
+      .from('brand_extractions')
+      .select('*')
+      .eq('project_id', projectId)
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+    return data || [];
+  }
+
+  async getBrandExtraction(extractionId: string): Promise<any | null> {
+    const user = await this.getCurrentUser();
+    
+    const { data, error } = await supabase
+      .from('brand_extractions')
+      .select('*')
+      .eq('id', extractionId)
+      .maybeSingle();
+
+    if (error) throw error;
+    
+    // Verify user owns the project for this extraction
+    if (data) {
+      const project = await this.getProject(data.project_id);
+      if (!project) {
+        throw new Error('Access denied');
+      }
+    }
+    
+    return data;
+  }
+
+  async updateProjectBrandTokens(projectId: string, brandTokens: any): Promise<void> {
+    const user = await this.getCurrentUser();
+    
+    // Verify user owns the project
+    const project = await this.getProject(projectId);
+    if (!project) {
+      throw new Error('Project not found or access denied');
+    }
+    
+    const { error } = await supabase
+      .from('projects')
+      .update({ brand_tokens: brandTokens })
+      .eq('id', projectId)
+      .eq('user_id', user.id);
+
+    if (error) throw error;
+  }
 }
 
 export const supabaseService = new SupabaseService();
