@@ -38,6 +38,24 @@ export default function ProjectsList() {
     });
   };
 
+  // Safe function to get font name with proper null/undefined handling
+  const getFontName = (fontStack: string | undefined | null): string => {
+    if (!fontStack || typeof fontStack !== 'string') {
+      return 'Default Font';
+    }
+    try {
+      const firstFont = fontStack.split(',')[0]?.trim();
+      return firstFont || 'Default Font';
+    } catch {
+      return 'Default Font';
+    }
+  };
+
+  // Safe function to get radius with fallback
+  const getRadius = (radius: number | undefined | null): number => {
+    return typeof radius === 'number' ? radius : 8;
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900">
@@ -93,7 +111,7 @@ export default function ProjectsList() {
               <Card 
                 key={project.id} 
                 className="cursor-pointer transition-all duration-200 hover:shadow-lg hover:scale-105 group"
-                onClick={() => navigate(`/generate/${project.id}`)}
+                onClick={() => navigate(`/projects/${project.id}/templates`)}
               >
                 <CardHeader className="pb-3">
                   <div className="flex items-start justify-between">
@@ -116,32 +134,32 @@ export default function ProjectsList() {
                     <div className="flex gap-2">
                       <div 
                         className="w-8 h-8 rounded-full border border-slate-200 dark:border-slate-700"
-                        style={{ backgroundColor: project.brand_tokens.primary }}
-                        title={`Primary: ${project.brand_tokens.primary}`}
+                        style={{ backgroundColor: project.brand_tokens?.primary || '#1a73e8' }}
+                        title={`Primary: ${project.brand_tokens?.primary || '#1a73e8'}`}
                       />
                       <div 
                         className="w-8 h-8 rounded-full border border-slate-200 dark:border-slate-700"
-                        style={{ backgroundColor: project.brand_tokens.secondary }}
-                        title={`Secondary: ${project.brand_tokens.secondary}`}
+                        style={{ backgroundColor: project.brand_tokens?.secondary || '#34a853' }}
+                        title={`Secondary: ${project.brand_tokens?.secondary || '#34a853'}`}
                       />
                       <div 
                         className="w-8 h-8 rounded-full border border-slate-200 dark:border-slate-700"
-                        style={{ backgroundColor: project.brand_tokens.text }}
-                        title={`Text: ${project.brand_tokens.text}`}
+                        style={{ backgroundColor: project.brand_tokens?.text || '#1f2937' }}
+                        title={`Text: ${project.brand_tokens?.text || '#1f2937'}`}
                       />
                       <div 
                         className="w-8 h-8 rounded-full border border-slate-200 dark:border-slate-700"
-                        style={{ backgroundColor: project.brand_tokens.background }}
-                        title={`Background: ${project.brand_tokens.background}`}
+                        style={{ backgroundColor: project.brand_tokens?.background || '#ffffff' }}
+                        title={`Background: ${project.brand_tokens?.background || '#ffffff'}`}
                       />
                     </div>
                     
                     <div className="flex flex-wrap gap-1">
                       <Badge variant="secondary" className="text-xs">
-                        {project.brand_tokens.fontStack.split(',')[0].trim()}
+                        {getFontName(project.brand_tokens?.fontStack)}
                       </Badge>
                       <Badge variant="secondary" className="text-xs">
-                        {project.brand_tokens.radius}px radius
+                        {getRadius(project.brand_tokens?.radius)}px radius
                       </Badge>
                     </div>
                   </div>
