@@ -193,7 +193,7 @@ export function QuickEditActions({ onEdit, currentTemplatePlan, isMobile = false
       {quickActions.map((category) => {
         const IconComponent = category.icon;
         return (
-          <div key={category.category}>
+          <div key={category.category} className="overflow-hidden">
             <div className="flex items-center gap-2 mb-3">
               <IconComponent className="w-4 h-4 text-slate-600" />
               <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
@@ -201,19 +201,19 @@ export function QuickEditActions({ onEdit, currentTemplatePlan, isMobile = false
               </span>
             </div>
             
-            <div className="grid gap-2">
+            <div className="grid gap-2 overflow-hidden">
               {category.actions.map((action, index) => (
                 <Button
                   key={index}
                   variant="outline"
                   size="sm"
                   onClick={() => handleQuickAction(action.ops, action.fullLabel)}
-                  className="justify-start text-left h-auto py-2 px-3"
+                  className="justify-start text-left h-auto py-2 px-3 overflow-hidden"
                 >
-                  <div className="flex items-center gap-2 w-full">
+                  <div className="flex items-center gap-2 w-full overflow-hidden">
                     <Zap className="w-3 h-3 text-blue-500 flex-shrink-0" />
-                    <div className="min-w-0 flex-1">
-                      <div className="text-xs font-medium">{action.fullLabel}</div>
+                    <div className="min-w-0 flex-1 overflow-hidden">
+                      <div className="text-xs font-medium truncate">{action.fullLabel}</div>
                       <div className="text-xs text-slate-500 truncate">{action.description}</div>
                     </div>
                   </div>
